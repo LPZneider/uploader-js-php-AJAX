@@ -1,11 +1,118 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>formulario Api fetch</title>
-    <link rel="stylesheet" href="/css/styles.css" />
+    <style>
+      :root {
+        --main-font: sans-serif;
+        --font-size: 16px;
+        --main-color: #f7df1e;
+        --second-color: #222;
+        --main-modal-color: rgba(247, 222, 30, 0.85);
+        --second-modal-color: rgba(34, 34, 34, 0.85);
+        --container-width: 1200px;
+      }
+      html {
+        box-sizing: border-box;
+        font-family: var(--main-font);
+        font-size: var(--font-size);
+      }
+
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+
+      body {
+        margin: 0;
+        overflow-x: hidden;
+      }
+
+      .contact-form {
+        --form-ok-color: #4caf50;
+        --form-error-color: #f44336;
+        margin-left: auto;
+        margin-right: auto;
+        width: 80%;
+      }
+      .contact-form > * {
+        padding: 0.5rem;
+        margin: 1rem auto;
+        display: block;
+        width: 100%;
+      }
+
+      .contact-form textarea {
+        resize: none;
+      }
+
+      .contact-form legend,
+      .contact-form-response {
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .contact-form input,
+      .contact-form textarea {
+        font-size: 1rem;
+        font-family: sans-serif;
+      }
+
+      .contact-form input[type="submit"] {
+        width: 50%;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .contact-form *::placeholder {
+        color: #000;
+      }
+
+      .contact-form [required]:valid {
+        border: thin solid var(--form-ok-color);
+      }
+      .contact-form [required]:invalid {
+        border: thin solid var(--form-error-color);
+      }
+
+      .contact-form-error {
+        margin-top: -1rem;
+        font-size: 80%;
+        background-color: var(--form-error-color);
+        color: #fff;
+        transition: all 800ms ease;
+      }
+
+      .contact-form-error.is-active {
+        display: block;
+        animation: show-message 1s 1 normal 0s ease-out both;
+      }
+
+      .contact-form-loader {
+        text-align: center;
+      }
+
+      .none {
+        display: none;
+      }
+
+      @keyframes show-message {
+        0% {
+          visibility: hidden;
+          opacity: 0;
+        }
+
+        100% {
+          visibility: visible;
+          opacity: 1;
+        }
+      }
+    </style>
   </head>
   <body>
     <section>
@@ -47,6 +154,12 @@
           title="Tu comentario no debe exceder los 255 caracteres"
         ></textarea>
         <input type="submit" />
+        <div class="contact-form-loader none">
+          <img src="/assets/Reload-1s-200px.svg" alt="cargando" />
+        </div>
+        <div class="contact-form-response none">
+          <p>Los datos han sido enviados</p>
+        </div>
       </form>
     </section>
     <script>
@@ -86,9 +199,9 @@
 
         const enviarFormulario = async () => {};
 
-        d.addEventListener("submit", async (e) => {
+        d.addEventListener("submit", (e) => {
           e.preventDefault();
-          if (e.target === $form) {
+          /*  if (e.target === $form) {
             try {
               let data = {
                 Nombre: e.target.name.value,
@@ -97,7 +210,7 @@
                 Comentarios: e.target.comments.value,
               };
 
-              let rest = await fetch(
+              let rest = await fetch( 
                 "https://formsubmit.co/ajax/lpzneider@gmail.com",
                 {
                   method: "POST",
@@ -110,16 +223,49 @@
               );
               let json = await rest.json();
 
-              console.log(rest);
-              console.log(json);
               if (!rest.ok)
                 throw { status: result.status, statusText: result.statusText };
             } catch (err) {
               console.log(err);
               let message = err.statusText || "Ocurrio un error";
               $form.innerHTML = `Error ${err.status}: ${message}`;
-            }
-          }
+            } */
+
+          const $loader = d.querySelector(".contact-form-loader"),
+            $response = d.querySelector(".contact-form-response");
+
+          $loader.classList.remove("none");
+
+          /* setTimeout(() => {
+              $loader.classList.add("none");
+              $response.classList.remove("none");
+              $form.reset();
+
+              setTimeout(() => $response.classList.add("none"), 3000);
+            }, 3000); 
+          } */
+
+          fetch("https://formsubmit.co/ajax/lpzneider@gmail.com", {
+            method: "POST",
+            body: new FormData(e.target),
+          })
+            .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+            .then((json) => {
+              $loader.classList.add("none");
+              $response.classList.remove("none");
+              $response.innerHTML = `<p>${json.message}</p>`;
+              $form.reset();
+            })
+            .catch((err) => {
+              let message =
+                err.statusText ||
+                "Ocurrio un error al enviar el formulario intenta nuevamente";
+              $response.innerHTML = `<p>Error ${err.status}: ${message}</p>`;
+            })
+            .finally(() => {
+              setTimeout(() => $response.classList.add("none"), 3000);
+              console.log(e.target);
+            });
         });
       }
 
