@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokemon</title>
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: inherit;
+      }
+      main {
+       display: flex;
+       flex-wrap:wrap ;
+      }
+      .pokemos{
+        flex: 1 1 200px;
+        margin: 1rem;
+      }
+      .none{
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+        <button id="previous" class="none">Anterior</button>
+        <button id="next">siguiente</button></div>
+    <main></main>
+    <template id="pokemon-template">
+      <figure class="pokemos">
+        <img />
+        <figcaption></figcaption>
+      </figure>
+    </template>
+    <script>
+      const d = document,
+        $main = d.querySelector("main"),
+        $template = d.getElementById("pokemon-template").content,
+        $frament = d.createDocumentFragment(),
+        $next = d.getElementById("next"),
+        $previos = d.getElementById("previous");
+
+      const getImagen = async (el, url) => {
+        let res = await fetch(url);
+        let json = await res.json();
+
+        $template.querySelector("img").src = json.sprites.front_default;
+        $template.querySelector("figcaption").innerHTML = `${el.name}`;
+
+        let $clone = d.importNode($template, true);
+        $frament.appendChild($clone);
+
+        $main.appendChild($frament);
+      };
+
+      const getPokemon = async (url) => {
+        try {
+          let res = await fetch(url);
+          let json = await res.json();
+             
+          if (!res.ok) throw { status: res.status, statusText: res.statusText };
+            $next.dataset.next = json.next;
+            $previos.dataset.previos = json.previous
+            $main.innerHTML = "";
+;
+            // console.log($next)
+            // console.log($previos)
+          json.results.forEach((el) => {
+            getImagen(el, el.url);
+            
+          });
+
+        } catch (err) {
+          console.log(err);
+          let message =
+            err.statusText ||
+            "Ocurrio un error al conectarse a la API de pokeApi";
+
+          $main.innerHTML = `<p> Error ${err.status}: ${message} </p>`;
+        }finally{
+            setTimeout(()=>{
+
+            },2000)
+        }
+      };
+
+      d.addEventListener("DOMContentLoaded", getPokemon("https://pokeapi.co/api/v2/pokemon-form"));
+
+      d.addEventListener("click",e=>{
+        if(e.target === $next){
+            if($next.dataset.previos !== "null"){
+                $previos.classList.remove("none")
+            }
+
+            getPokemon($next.dataset.next)
+            
+        }
+        if(e.target === $previos){
+            
+            if($previos.dataset.previos !== "null"){      
+                $previos.classList.remove("none")         
+                getPokemon($previos.dataset.previos)
+            }
+            if ( e.target.dataset.previos === 'null'){
+                $previos.classList.add("none")
+            }
+            // console.log(e.target)
+        }
+      })
+    </script>
+  </body>
+</html>
