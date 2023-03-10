@@ -12,16 +12,18 @@ const d = document,
 
 let products, prices;
 
+const moneyFormt = (num) => `$${num.slice(0, -2)}.${num.slice(-2)}`;
+
 Promise.all([
   fetch("https://api.stripe.com/v1/products", fetchOptions),
   fetch("https://api.stripe.com/v1/prices", fetchOptions),
 ])
   .then((responses) => Promise.all(responses.map((res) => res.json())))
   .then((json) => {
-    console.log(json);
+    // console.log(json);
     products = json[0].data;
     prices = json[1].data;
-    console.log(prices, products);
+    // console.log(prices, products);
 
     prices.forEach((el) => {
       let producData = products.filter((product) => product.id === el.product);
@@ -31,7 +33,7 @@ Promise.all([
       $template.querySelector("figcaption").innerHTML = `
         ${producData[0].name} 
         <br>
-        ${el.unit_amount_decimal} ${el.currency}
+        ${moneyFormt(el.unit_amount_decimal)} ${el.currency}
         `;
 
       let $clone = d.importNode($template, true);
@@ -47,3 +49,19 @@ Promise.all([
 
     $tacos.innerHTML = `<p> Error ${err.status}: ${message} </p>`;
   });
+
+d.addEventListener("click", (e) => {
+  if (e.target.matches(".taco *")) {
+    let price = e.target.parentElement.getAttribute("data-price");
+   
+      Stripe(STRIPE_KEYS.public)
+      .redirectToCheckout({ 
+        lineItems: [{price, quantity: 1 }],
+        mode: "subscription",
+        successUrl:
+        "http://127.0.0.1:5500/assets/stripe-success.html",
+        cancelUrl:
+        "http://127.0.0.1:5500/assets/stripe-cancel.html",
+      })  
+  }
+});
