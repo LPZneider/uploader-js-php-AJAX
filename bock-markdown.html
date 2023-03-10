@@ -7,6 +7,26 @@
     <title>Blog con Markdown|Showdoun</title>
 </head>
 <body>
-    
+    <main>
+
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <script>
+        const d = document,
+        $main = d.querySelector("main");
+
+        fetch("assets/javascript.md")
+        .then(res=> res.ok? res.text(): Promise.reject(res) )
+        .then(text=>{
+           $main.innerHTML = new showdown.Converter().makeHtml(text) 
+        })
+        .catch(err =>{
+            console.log(err)
+            let message = err.statusText || "Ocurrio un error";
+            $main.innerHTML = `Error ${err.status}: ${message}`;
+        })
+
+
+    </script>
 </body>
 </html>
