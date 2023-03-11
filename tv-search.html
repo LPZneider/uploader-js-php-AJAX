@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TV Search</title>
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      img {
+        max-width: 100%;
+      }
+      main {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        text-align: center;
+      }
+      .seccion {
+        margin: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Buscador Shows de TV</h1>
+    <input type="search" id="buscador" />
+    <main></main>
+    <template id="search-template">
+      <section class="seccion">
+        <h2></h2>
+        <p></p>
+        <img />
+      </section>
+    </template>
+
+    <script>
+      const d = document,
+        $main = d.querySelector("main"),
+        $buscador = d.getElementById("buscador"),
+        $template = d.getElementById("search-template").content,
+        $fragment = d.createDocumentFragment();
+
+      async function getShows(url) {
+        try {
+          let res = await fetch(`https://api.tvmaze.com/search/shows?q=${url}`),
+            json = await res.json();
+          if (!res.ok) throw { status: err.status, statusText: err.statusText };
+            $main.innerHTML = "";
+          // console.log(json)
+          json.forEach((el) => {
+            let text = el.show.summary;
+            // console.log(el.show);
+            $template.querySelector("h2").textContent = el.show.name;
+            $template.querySelector("img").src = el.show.image.original;
+            $template.querySelector("img").alt = el.show.name;
+            $template.querySelector("p").innerHTML = text;
+            let $clone = d.importNode($template, true);
+            $fragment.appendChild($clone);
+          });
+
+          $main.appendChild($fragment);
+        } catch (err) {
+            return;
+          let message = err.statusText || "Ocurrio un error";
+          $main.innerHTML = `<p> Error ${status}: ${message} </p>`;
+        }
+      }
+
+    //   d.addEventListener("DOMContentLoaded", getShows());
+      d.addEventListener("keyup",e =>{
+        if(e.target === $buscador){
+            console.log(e.key)
+            console.log(e.target.value)
+            getShows(e.target.value)
+        }
+      })
+    </script>
+  </body>
+</html>
