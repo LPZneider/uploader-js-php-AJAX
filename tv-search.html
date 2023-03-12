@@ -55,7 +55,7 @@
             let text = el.show.summary;
             // console.log(el.show);
             $template.querySelector("h2").textContent = el.show.name;
-            $template.querySelector("img").src = el.show.image.original;
+            $template.querySelector("img").src = el.show.image.medium;
             $template.querySelector("img").alt = el.show.name;
             $template.querySelector("p").innerHTML = text;
             let $clone = d.importNode($template, true);
@@ -64,7 +64,6 @@
 
           $main.appendChild($fragment);
         } catch (err) {
-            return;
           let message = err.statusText || "Ocurrio un error";
           $main.innerHTML = `<p> Error ${status}: ${message} </p>`;
         }
@@ -73,9 +72,9 @@
     //   d.addEventListener("DOMContentLoaded", getShows());
       d.addEventListener("keyup",e =>{
         if(e.target === $buscador){
-            console.log(e.key)
-            console.log(e.target.value)
-            getShows(e.target.value)
+            if(e.key === 'Enter'){
+                getShows(e.target.value.toLowerCase())
+            }
         }
       })
     </script>
